@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 import hello.login.domain.member.Member;
 import hello.login.domain.member.MemberRepository;
+import hello.login.web.argumentresolver.Login;
 import hello.login.web.session.SessionManager;
 
 @Slf4j
@@ -85,25 +86,38 @@ public class HomeController {
         return "loginHome";
     }
 
+    /*
+        * @SessionAttribute
+        * 이미 로그인 된 사용자를 찾을때는 아래와 같이 사용하면 된다.
+        * 참고로 이 기능은 세션을 생성하지 않는다
+        */
+    // @GetMapping("/")
+    public String homeLoginV3Spring(
+        @SessionAttribute(name = SessionConst.LOGIN_MEMBER,required = false)
+        Member loginMember, Model model) {
 
-        /*
-         * @SessionAttribute
-         * 이미 로그인 된 사용자를 찾을때는 아래와 같이 사용하면 된다.
-         * 참고로 이 기능은 세션을 생성하지 않는다
-         */
-        @GetMapping("/")
-        public String homeLoginV3Spring(
-            @SessionAttribute(name = SessionConst.LOGIN_MEMBER,required = false)
-            Member loginMember, Model model) {
-    
-            // 세션에 회원 데이터가 없으면 home
-            if(loginMember == null) {
-                return "home";
-            }
-    
-            // 세션이 유지되면 로그인으로 이동
-            model.addAttribute("member", loginMember);
-            return "loginHome";
+        // 세션에 회원 데이터가 없으면 home
+        if(loginMember == null) {
+            return "home";
         }
+
+        // 세션이 유지되면 로그인으로 이동
+        model.addAttribute("member", loginMember);
+        return "loginHome";
+    }
+
+    @GetMapping("/")
+    public String homeLoginV3ArgumentResolver(@Login Member loginMember, Model model) {
+
+        // 세션에 회원 데이터가 없으면 home
+        if(loginMember == null) {
+            return "home";
+        }
+
+        // 세션이 유지되면 로그인으로 이동
+        model.addAttribute("member", loginMember);
+        return "loginHome";
+    }
+
 
 }
