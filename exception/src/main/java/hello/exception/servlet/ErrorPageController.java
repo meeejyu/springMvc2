@@ -1,8 +1,15 @@
 package hello.exception.servlet;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -27,11 +34,19 @@ public class ErrorPageController {
         return "error-page/404";
     }
 
-    @RequestMapping("/error-page/500")
-    public String errorPage500(HttpServletRequest request, HttpServletResponse response) {
-        log.info("errorPage 500");
-        printErrorInfo(request);
-        return "error-page/500";
+    @RequestMapping(value = "/error-page/500", produces = MediaType.APPLICATION_JSON_VALUE) // 클라이언트가 요청하는 http header의 accept의 값이 application/json일 때 메소드 호출
+    public ResponseEntity<Map<String, Object>> errorPage500Api(HttpServletRequest request, HttpServletResponse response) {
+
+        log.info("API errorPage 500");
+
+        Map<String, Object> result = new HashMap<>();
+        Exception ex = (Exception) request.getAttribute(ERROR_EXCEPTION);
+        result.put("status", request.getAttribute(ERROR_EXCEPTION));
+        result.put("message", ex.getMessage());
+
+        Integer statusCode = (Integer) request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        return new ResponseEntity<>(result, HttpStatus.valueOf(statusCode)); // http 상태값을 넣어줄수 있음
+
     }
 
     private void printErrorInfo(HttpServletRequest request) {
